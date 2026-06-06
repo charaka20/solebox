@@ -97,23 +97,23 @@ export default function Hero({ onScrollClick }: HeroProps) {
       </div>
 
       {/* EU 39-45 . Rs. 17,990 stats row under the gold trust bar */}
-      <div className="bg-[#1A1712] border-b border-[#C9A84C]/10 py-5 px-4">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center divide-y md:divide-y-0 md:divide-x divide-[#C9A84C]/15">
+      <div className="bg-[#FDFCFB] border-b border-[#e4e0da] py-5 px-4">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center divide-y md:divide-y-0 md:divide-x divide-[#e4e0da]">
           <div className="flex flex-col items-center justify-center p-1 md:first:border-none">
             <span className="font-mono text-[8.5px] uppercase tracking-widest text-zinc-500 font-bold">EU SIZE SPECIFICATION</span>
-            <span className="font-display font-bold text-white text-base sm:text-lg mt-1 tracking-wider">39 — 45 Range</span>
+            <span className="font-display font-bold text-[#1A1712] text-base sm:text-lg mt-1 tracking-wider">39 — 45 Range</span>
           </div>
           <div className="flex flex-col items-center justify-center p-1 pt-4 md:pt-1">
-            <span className="font-mono text-[8.5px] uppercase tracking-widest text-zinc-500 font-bold">FLAT-RATE PRICING</span>
-            <span className="font-display font-black text-[#C9A84C] text-lg sm:text-xl mt-0.5">Rs. 17,990 Net</span>
+            <span className="font-mono text-[8.5px] uppercase tracking-widest text-[#8A6D2E] font-extrabold">FLAT-RATE PRICING</span>
+            <span className="font-display font-black text-[#8A6D2E] text-lg sm:text-xl mt-0.5">Rs. 17,990 Net</span>
           </div>
           <div className="flex flex-col items-center justify-center p-1 pt-4 md:pt-1">
             <span className="font-mono text-[8.5px] uppercase tracking-widest text-zinc-500 font-bold">LOCAL EXPEDITION</span>
-            <span className="font-display font-medium text-white text-sm sm:text-base mt-1 uppercase tracking-wide">Domex & Pronto</span>
+            <span className="font-display font-medium text-[#1A1712] text-sm sm:text-base mt-1 uppercase tracking-wide">Domex & Pronto</span>
           </div>
           <div className="flex flex-col items-center justify-center p-1 pt-4 md:pt-1">
-            <span className="font-mono text-[8.5px] uppercase tracking-widest text-[#C9A84C] font-bold">SECURITY CLAUSE</span>
-            <span className="font-display font-black text-[#C9A84C] text-sm sm:text-base mt-1 uppercase tracking-wide">100% COD Guarantee</span>
+            <span className="font-mono text-[8.5px] uppercase tracking-widest text-[#8A6D2E] font-extrabold">SECURITY CLAUSE</span>
+            <span className="font-display font-black text-[#8A6D2E] text-sm sm:text-base mt-1 uppercase tracking-wide">100% COD Guarantee</span>
           </div>
         </div>
       </div>
