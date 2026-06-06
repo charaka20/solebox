@@ -1,4 +1,4 @@
-import { ShoppingBag, Shield, User as UserIcon, LogOut, Disc } from "lucide-react";
+import { ShoppingBag, Shield, User as UserIcon, LogOut } from "lucide-react";
 import { useApp } from "../context/AppContext";
 
 interface HeaderProps {
@@ -24,10 +24,15 @@ export default function Header({
     <header className="sticky top-0 z-40 w-full bg-[#F7F4EE]/90 backdrop-blur-md border-b border-[#e4e0da] px-4 sm:px-6 md:px-8 py-4 transition-all">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Brand signature Logo */}
-        <div className="flex items-center gap-2 group">
-          <Disc size={20} className="text-[#C9A84C] animate-spin" style={{ animationDuration: "12s" }} />
-          <span className="font-display font-black text-lg sm:text-xl tracking-[0.25em] text-[#1A1712] select-none cursor-pointer">
-            SOLE<span className="text-[#C9A84C]">BOX</span> <span className="font-sans text-[9px] tracking-widest uppercase text-zinc-400">LK</span>
+        <div className="flex items-center gap-3 group cursor-pointer" onClick={onOrderClick}>
+          <img 
+            src="/images/Logo.png" 
+            alt="SoleBox LK Logo" 
+            className="h-10 sm:h-12 w-auto object-contain mix-blend-multiply select-none" 
+            referrerPolicy="no-referrer" 
+          />
+          <span className="font-display font-black text-lg sm:text-xl tracking-[0.2em] text-[#1A1712] select-none">
+            SOLE<span className="text-[#C9A84C]">BOX</span> <span className="font-sans text-[8px] tracking-widest uppercase text-zinc-400">LK</span>
           </span>
         </div>
 

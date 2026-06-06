@@ -5,19 +5,19 @@ export default function Reviews() {
     {
       name: "Amith Jayasinghe",
       city: "Colombo",
-      comment: "Absolutely pristine Travis Scotts. The custom parcel packaging arrived sealed and the authenticity check cleared. Highly recommended imports curating!",
+      comment: "Absolutely pristine export quality runners. The custom parcel packaging arrived sealed and the authenticity check cleared. Highly recommended imports curating!",
       rating: 5,
     },
     {
       name: "Shehan Fonseka",
       city: "Kandy",
-      comment: "Insanely fast cash-on-delivery turnaround. Ordered NB 550s yesterday, they arrived today in Hanthana with tracking. Truly premium.",
+      comment: "Insanely fast cash-on-delivery turnaround. Ordered premium low-tops yesterday, they arrived today in Hanthana with tracking. Truly premium.",
       rating: 5,
     },
     {
       name: "Naduni Pieris",
       city: "Nugegoda",
-      comment: "I was highly skeptical at first, but SoleBox LK has proved that their direct importing sequence works. Spotless Dunk Lows custom shipped.",
+      comment: "I was highly skeptical at first, but SoleBox LK has proved that their direct importing sequence works. Spotless curated imports custom shipped.",
       rating: 5,
     }
   ];

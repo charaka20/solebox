@@ -61,7 +61,7 @@ export default function Hero({ onScrollClick }: HeroProps) {
                 {/* Premium Curated Active Drop Image */}
                 <img
                   src="/images/4.png"
-                  alt="Curated Series S1 - Featured Yeezy Boost Onyx"
+                  alt="Curated Series S1 - Premium Export Runner"
                   className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
                   referrerPolicy="no-referrer"
                 />
@@ -100,19 +100,19 @@ export default function Hero({ onScrollClick }: HeroProps) {
       <div className="bg-[#FDFCFB] border-b border-[#e4e0da] py-5 px-4">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center divide-y md:divide-y-0 md:divide-x divide-[#e4e0da]">
           <div className="flex flex-col items-center justify-center p-1 md:first:border-none">
-            <span className="font-mono text-[8.5px] uppercase tracking-widest text-zinc-500 font-bold">EU SIZE SPECIFICATION</span>
+            <span className="font-mono text-[8.5px] uppercase tracking-widest text-zinc-500 font-bold">SIZES</span>
             <span className="font-display font-bold text-[#1A1712] text-base sm:text-lg mt-1 tracking-wider">39 — 45 Range</span>
           </div>
           <div className="flex flex-col items-center justify-center p-1 pt-4 md:pt-1">
-            <span className="font-mono text-[8.5px] uppercase tracking-widest text-[#8A6D2E] font-extrabold">FLAT-RATE PRICING</span>
+            <span className="font-mono text-[8.5px] uppercase tracking-widest text-[#8A6D2E] font-extrabold">PRICE</span>
             <span className="font-display font-black text-[#8A6D2E] text-lg sm:text-xl mt-0.5">Rs. 17,990 Net</span>
           </div>
           <div className="flex flex-col items-center justify-center p-1 pt-4 md:pt-1">
-            <span className="font-mono text-[8.5px] uppercase tracking-widest text-zinc-500 font-bold">LOCAL EXPEDITION</span>
+            <span className="font-mono text-[8.5px] uppercase tracking-widest text-zinc-500 font-bold">SHIPPING PARTNER</span>
             <span className="font-display font-medium text-[#1A1712] text-sm sm:text-base mt-1 uppercase tracking-wide">Domex & Pronto</span>
           </div>
           <div className="flex flex-col items-center justify-center p-1 pt-4 md:pt-1">
-            <span className="font-mono text-[8.5px] uppercase tracking-widest text-[#8A6D2E] font-extrabold">SECURITY CLAUSE</span>
+            <span className="font-mono text-[8.5px] uppercase tracking-widest text-[#8A6D2E] font-extrabold">PAYMENT</span>
             <span className="font-display font-black text-[#8A6D2E] text-sm sm:text-base mt-1 uppercase tracking-wide">100% COD Guarantee</span>
           </div>
         </div>

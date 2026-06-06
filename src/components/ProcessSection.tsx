@@ -4,18 +4,18 @@ export default function ProcessSection() {
   const steps = [
     {
       icon: <Search size={20} className="text-[#C9A84C]" />,
-      title: "PREMIUM GLOBAL CURATION",
-      description: "Our dedicated sneaker team sources highly-coveted upcoming drops directly from authorized distributors across global hubs with authentic credentials."
+      title: "WE FIND IT",
+      description: "We handpick each pair for quality, fit, and durability — then ship directly to your door."
     },
     {
       icon: <ShieldCheck size={20} className="text-[#C9A84C]" />,
-      title: "FACTORY AUTHENTICATION",
-      description: "Every shoe undergoes exhaustive 12-point authentication inspections, ensuring 100% factory-seal security, correct stitching, and un-compromised fit."
+      title: "WE CHECK IT",
+      description: "Every shoe undergoes an intensive physical and aesthetic inspection to verify proper stitching, material grade, and sizing accuracy before packing."
     },
     {
       icon: <Truck size={20} className="text-[#C9A84C]" />,
-      title: "TRUSTED EXPORT DELIVERY",
-      description: "Sneakers fly straight through clearance channels into Sri Lanka, package insulated under extreme temperature monitoring, dispatched with instant courier tracking."
+      title: "WE DELIVER IT",
+      description: "Your handpicked pair is quickly dispatched with premium wrapping and tracking details, delivered safely to any address in Sri Lanka with Cash on Delivery."
     }
   ];
 
@@ -26,7 +26,7 @@ export default function ProcessSection() {
         {/* Title */}
         <div className="mb-12 space-y-2 text-center sm:text-left">
           <div className="text-[10px] font-mono tracking-[0.3em] text-[#C9A84C] uppercase font-bold">THE SOLEBOX SYSTEM</div>
-          <h3 className="font-display font-medium text-2xl sm:text-3xl text-[#F7F4EE] uppercase tracking-tight">SECURE TRANSACTIONS SEQUENCE</h3>
+          <h3 className="font-display font-medium text-2xl sm:text-3xl text-[#F7F4EE] uppercase tracking-tight">HOW IT WORKS</h3>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
