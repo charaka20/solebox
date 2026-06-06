@@ -9,9 +9,9 @@ export default function Hero({ onScrollClick }: HeroProps) {
     <div>
       <section className="relative bg-[#F4F1EA] pt-12 sm:pt-16 pb-0 px-4 sm:px-6 md:px-8 overflow-hidden border-b border-[#e4e0da]">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch min-h-[440px]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center min-h-[460px] md:min-h-[520px]">
             {/* Left Content Column */}
-            <div className="flex flex-col justify-center py-6 sm:py-12 space-y-6">
+            <div className="flex flex-col justify-center py-8 sm:py-12 space-y-6">
               <div className="inline-flex items-center gap-2 text-[#C9A84C]">
                 <span className="h-0.5 w-6 bg-[#C9A84C]" />
                 <span className="font-mono text-[10px] uppercase tracking-[0.3em] font-bold">Premium Footwear</span>
@@ -53,8 +53,8 @@ export default function Hero({ onScrollClick }: HeroProps) {
             </div>
 
             {/* Right Graphic/Mock Column */}
-            <div className="flex items-end justify-center pt-8 md:pt-16">
-              <div className="relative w-full h-[280px] sm:h-[350px] md:h-[400px] bg-[#ece9e2] rounded-t-lg flex items-center justify-center overflow-hidden border border-[#e4e0da] border-b-0 shadow-sm group">
+            <div className="flex items-center justify-center py-6 sm:py-8 md:py-12">
+              <div className="relative w-full h-[280px] sm:h-[350px] md:h-[420px] bg-[#ece9e2] rounded-xl flex items-center justify-center overflow-hidden border border-[#e4e0da] shadow-lg group">
                 <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
                 
                 {/* Premium Curated Active Drop Image */}

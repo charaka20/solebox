@@ -27,6 +27,27 @@ export default function CartDrawer({ isOpen, onClose, onOpenAuth }: CartDrawerPr
 
   const subtotal = cart.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
 
+  const getWhatsAppLink = () => {
+    const itemsList = cart.map((item, index) => 
+      `${index + 1}. [${item.product.brand.toUpperCase()}] ${item.product.name}\n   Size: EUR ${item.size} × Qty: ${item.quantity}\n   Price: LKR ${(item.product.price * item.quantity).toLocaleString()}`
+    ).join("\n\n");
+
+    const message = `Hi SoleBox LK! 🇱🇰
+
+I would like to place an order for the following premium sneaker items in my cart:
+
+${itemsList}
+
+━━━━━━━━━━━━━━━━━━━━━
+Total Price: LKR ${subtotal.toLocaleString()}
+Payment Mode: Cash On Delivery (Free Import Delivery)
+
+${address.trim() ? `Delivery Address: ${address.trim()}\n` : ""}${phone.trim() ? `Contact Phone: ${phone.trim()}\n` : ""}${currentUser?.email ? `Customer Account: ${currentUser.email}\n` : ""}
+Please confirm my order details! Thank you!`;
+
+    return `https://wa.me/94722401093?text=${encodeURIComponent(message)}`;
+  };
+
   const handleSubmitCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError("");
@@ -174,18 +195,39 @@ export default function CartDrawer({ isOpen, onClose, onOpenAuth }: CartDrawerPr
 
                 {/* Secure Auth Warning if Checkout is pressed without auth */}
                 {!currentUser ? (
-                  <div className="bg-zinc-950 border border-zinc-900 p-3.5 rounded space-y-2 text-center">
-                    <p className="font-sans text-[11px] text-zinc-400">Please sign in to authenticate transactional delivery.</p>
-                    <button
-                      id="cart-signin-trigger"
-                      onClick={() => {
-                        onClose();
-                        onOpenAuth();
-                      }}
-                      className="text-center w-full py-2 bg-white hover:bg-zinc-200 text-black font-mono font-bold text-[10px] tracking-widest rounded transition-all cursor-pointer uppercase"
+                  <div className="bg-zinc-950 border border-zinc-900 p-3.5 rounded space-y-3.5 text-center">
+                    <div>
+                      <p className="font-sans text-[11px] text-zinc-400">Please sign in to authenticate transactional delivery.</p>
+                      <button
+                        id="cart-signin-trigger"
+                        onClick={() => {
+                          onClose();
+                          onOpenAuth();
+                        }}
+                        className="mt-2 text-center w-full py-2 bg-white hover:bg-zinc-200 text-black font-mono font-bold text-[10px] tracking-widest rounded transition-all cursor-pointer uppercase"
+                      >
+                        AUTHENTICATE ACCOUNT
+                      </button>
+                    </div>
+
+                    <div className="relative flex py-1 items-center">
+                      <div className="flex-grow border-t border-zinc-900/40"></div>
+                      <span className="flex-shrink mx-3 text-[9px] font-mono text-zinc-600 tracking-widest uppercase">OR BYPASS</span>
+                      <div className="flex-grow border-t border-zinc-900/40"></div>
+                    </div>
+
+                    <a
+                      id="cart-whatsapp-order-instant"
+                      href={getWhatsAppLink()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 w-full py-3 bg-[#128C7E]/10 border border-[#128C7E]/30 hover:bg-[#128C7E]/20 text-[#25D366] font-mono font-bold text-[10.5px] tracking-widest rounded transition-all uppercase select-none no-underline"
                     >
-                      AUTHENTICATE ACCOUNT
-                    </button>
+                      <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12.004 2c-5.51 0-9.99 4.49-9.99 10 0 2.01.6 3.88 1.62 5.46L2 22l4.72-1.24c1.51.93 3.32 1.48 5.27 1.48 5.51 0 10-4.49 10-10s-4.49-10-10-10zm0 1.5c4.68 0 8.5 3.82 8.5 8.5s-3.82 8.5-8.5 8.5c-1.8 0-3.46-.57-4.83-1.53l-.35-.24-2.88.75.76-2.8-.26-.39c-1.12-1.68-1.78-3.72-1.78-5.79 0-4.68 3.82-8.5 8.5-8.5zm-3.55 4.88c-.13 0-.34.05-.53.25-.19.2-.74.72-.74 1.77 0 1.04.76 2.05.86 2.19.1.14 1.47 2.25 3.57 3.16.5.21.89.34 1.2.44.5.16.96.14 1.32.08.4-.06 1.25-.51 1.42-1 .18-.5.18-.93.13-1.02-.05-.09-.2-.14-.4-.25-.2-.1-1.21-.6-1.39-.67-.18-.08-.32-.12-.45.08-.13.2-.5.63-.61.76-.11.13-.23.15-.43.05-.2-.1-.85-.31-1.61-.99-.6-.53-1-1.18-1.11-1.38-.11-.2-.01-.3.09-.4.09-.09.2-.23.3-.35.1-.12.13-.2.2-.33.07-.14.03-.26-.02-.36-.05-.1-.45-1.1-.62-1.5-.16-.4-.36-.33-.48-.34-.1-.01-.22-.01-.35-.01z" />
+                      </svg>
+                      ORDER VIA WHATSAPP
+                    </a>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmitCheckout} className="space-y-3.5 animate-reveal">
@@ -228,6 +270,25 @@ export default function CartDrawer({ isOpen, onClose, onOpenAuth }: CartDrawerPr
                       {isSubmitting ? "TRANSMITTING..." : "SUBMIT ORDER VIA C.O.D."}
                       <ArrowRight size={12} className="mt-0.5" />
                     </button>
+
+                    <div className="relative flex py-1 items-center">
+                      <div className="flex-grow border-t border-zinc-900/40"></div>
+                      <span className="flex-shrink mx-3 text-[9px] font-mono text-zinc-600 tracking-widest uppercase">OR</span>
+                      <div className="flex-grow border-t border-zinc-900/40"></div>
+                    </div>
+
+                    <a
+                      id="checkout-whatsapp-btn"
+                      href={getWhatsAppLink()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 w-full py-3 bg-[#128C7E]/10 border border-[#128C7E]/30 hover:bg-[#128C7E]/20 text-[#25D366] font-mono font-bold text-[10.5px] tracking-widest rounded transition-all uppercase select-none no-underline"
+                    >
+                      <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12.004 2c-5.51 0-9.99 4.49-9.99 10 0 2.01.6 3.88 1.62 5.46L2 22l4.72-1.24c1.51.93 3.32 1.48 5.27 1.48 5.51 0 10-4.49 10-10s-4.49-10-10-10zm0 1.5c4.68 0 8.5 3.82 8.5 8.5s-3.82 8.5-8.5 8.5c-1.8 0-3.46-.57-4.83-1.53l-.35-.24-2.88.75.76-2.8-.26-.39c-1.12-1.68-1.78-3.72-1.78-5.79 0-4.68 3.82-8.5 8.5-8.5zm-3.55 4.88c-.13 0-.34.05-.53.25-.19.2-.74.72-.74 1.77 0 1.04.76 2.05.86 2.19.1.14 1.47 2.25 3.57 3.16.5.21.89.34 1.2.44.5.16.96.14 1.32.08.4-.06 1.25-.51 1.42-1 .18-.5.18-.93.13-1.02-.05-.09-.2-.14-.4-.25-.2-.1-1.21-.6-1.39-.67-.18-.08-.32-.12-.45.08-.13.2-.5.63-.61.76-.11.13-.23.15-.43.05-.2-.1-.85-.31-1.61-.99-.6-.53-1-1.18-1.11-1.38-.11-.2-.01-.3.09-.4.09-.09.2-.23.3-.35.1-.12.13-.2.2-.33.07-.14.03-.26-.02-.36-.05-.1-.45-1.1-.62-1.5-.16-.4-.36-.33-.48-.34-.1-.01-.22-.01-.35-.01z" />
+                      </svg>
+                      ORDER VIA WHATSAPP
+                    </a>
                   </form>
                 )}
               </div>
