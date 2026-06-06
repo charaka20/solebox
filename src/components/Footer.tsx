@@ -70,8 +70,8 @@ export default function Footer() {
         </div>
       </section>
 
-      {/* 3. Base footer container rewritten to Obsidian #1A1712 */}
-      <footer className="bg-[#1A1712] border-t border-[#C9A84C]/10 py-10 px-4 sm:px-6 md:px-8 text-zinc-400 font-mono text-[10px]">
+      {/* 3. Base footer container rewritten to Obsidian #1A1712 with mobile bottom padding */}
+      <footer className="bg-[#1A1712] border-t border-[#C9A84C]/10 pt-10 pb-24 sm:pb-10 px-4 sm:px-6 md:px-8 text-zinc-400 font-mono text-[10px]">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Brand info */}
           <div className="flex items-center gap-2 flex-wrap">

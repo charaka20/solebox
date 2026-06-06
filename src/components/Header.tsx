@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { ShoppingBag, Shield, User as UserIcon, LogOut } from "lucide-react";
 import { useApp } from "../context/AppContext";
 
@@ -17,11 +18,31 @@ export default function Header({
   onOpenAdmin,
 }: HeaderProps) {
   const { currentUser, logout, cart, isAdmin } = useApp();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 80) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const totalCartQty = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#F7F4EE]/90 backdrop-blur-md border-b border-[#e4e0da] px-4 sm:px-6 md:px-8 py-4 transition-all">
+    <header
+      className={`sticky top-0 z-40 w-full transition-all duration-300 px-4 sm:px-6 md:px-8 ${
+        isScrolled
+          ? "bg-white/95 shadow-md border-b border-[#d8d3c9] py-2 sm:py-3"
+          : "bg-[#F7F4EE]/90 backdrop-blur-md border-b border-[#e4e0da] py-4"
+      }`}
+    >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Brand signature Logo */}
         <div className="flex items-center gap-3 group cursor-pointer" onClick={onOrderClick}>

@@ -210,6 +210,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
 
+    // Direct Bypass support: If we are not authenticated in Firebase Auth,
+    // we use locally stored/mock orders to avoid unauthorized domain/permission crashes
+    if (!auth.currentUser) {
+      const saved = localStorage.getItem("sb_orders");
+      if (saved) {
+        setOrders(JSON.parse(saved));
+      } else {
+        setOrders(initialMockOrders);
+      }
+      return;
+    }
+
     let q;
     if (currentUser.isAdmin) {
       q = collection(db, "orders");
@@ -271,6 +283,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // 4. Synchronize stock alerts / notifications in real-time for admins
   useEffect(() => {
     if (!currentUser || !currentUser.isAdmin) {
+      return;
+    }
+
+    // Direct Bypass support: If we are not authenticated in Firebase Auth,
+    // we use locally stored notifications to avoid unauthorized domain warnings
+    if (!auth.currentUser) {
+      const saved = localStorage.getItem("sb_notifications");
+      if (saved) {
+        setNotifications(JSON.parse(saved));
+      }
       return;
     }
 

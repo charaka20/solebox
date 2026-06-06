@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MessageSquare } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import { AppProvider, useApp } from "./context/AppContext";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
@@ -9,6 +10,8 @@ import ProcessSection from "./components/ProcessSection";
 import TrustSection from "./components/TrustSection";
 import Reviews from "./components/Reviews";
 import Footer from "./components/Footer";
+import ScrollReveal from "./components/ScrollReveal";
+import UGCStrip from "./components/UGCStrip";
 
 // Modals
 import CartDrawer from "./components/CartDrawer";
@@ -23,6 +26,14 @@ function MainAppContent() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowTooltip(true);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleScrollToGrid = () => {
     const el = document.getElementById("shop");
@@ -34,6 +45,16 @@ function MainAppContent() {
   return (
     <div className="min-h-screen bg-[#F7F4EE] text-[#1A1712] font-sans noise-overlay selection:bg-[#C9A84C]/30 selection:text-[#C9A84C]">
       
+      {/* Dynamic Announcement Scrolling Marquee Bar */}
+      <div className="w-full bg-[#1A1712] text-[#C9A84C] py-2 border-b border-black overflow-hidden select-none relative z-50">
+        <div className="flex animate-marquee whitespace-nowrap text-[9px] sm:text-xs font-mono font-medium tracking-widest uppercase gap-8">
+          <span>🚚 Free island-wide delivery • 💵 Cash on delivery • New drops every week • EU 39–45 in stock</span>
+          <span>🚚 Free island-wide delivery • 💵 Cash on delivery • New drops every week • EU 39–45 in stock</span>
+          <span>🚚 Free island-wide delivery • 💵 Cash on delivery • New drops every week • EU 39–45 in stock</span>
+          <span>🚚 Free island-wide delivery • 💵 Cash on delivery • New drops every week • EU 39–45 in stock</span>
+        </div>
+      </div>
+
       {/* Prime Navigation */}
       <Header
         onOrderClick={handleScrollToGrid}
@@ -43,25 +64,42 @@ function MainAppContent() {
         onOpenAdmin={() => setIsAdminOpen(true)}
       />
 
-      {/* Main visual sections */}
+      {/* Main visual sections with premium scroll animations */}
       <main className="space-y-4">
-        {/* Flags & Heros */}
+        {/* Hero loads immediately for layout performance */}
         <Hero onScrollClick={handleScrollToGrid} />
         
-        {/* Custom Step sequence process */}
-        <ProcessSection />
+        {/* Custom Step sequence process with animation */}
+        <ScrollReveal>
+          <ProcessSection />
+        </ScrollReveal>
 
-        {/* Dynamic products Grid */}
-        <ProductGrid />
+        {/* Dynamic products Grid with animation */}
+        <ScrollReveal>
+          <ProductGrid />
+        </ScrollReveal>
 
         {/* Custom Recharts Analytics Panel (Exclusively for Admins) */}
-        {isAdmin && <DataSection />}
+        {isAdmin && (
+          <ScrollReveal>
+            <DataSection />
+          </ScrollReveal>
+        )}
 
-        {/* Curation notes & Trust */}
-        <TrustSection />
+        {/* Curation notes & Trust with animation */}
+        <ScrollReveal>
+          <TrustSection />
+        </ScrollReveal>
 
-        {/* Client Social Proof feedbacks */}
-        <Reviews />
+        {/* Client Social Proof feedbacks with animation */}
+        <ScrollReveal>
+          <Reviews />
+        </ScrollReveal>
+
+        {/* Brand User Generated Lifestyle Feed Strip */}
+        <ScrollReveal>
+          <UGCStrip />
+        </ScrollReveal>
       </main>
 
       {/* Footer credits segment */}
@@ -93,6 +131,23 @@ function MainAppContent() {
           onClose={() => setIsAdminOpen(false)}
         />
       )}
+
+      {/* Elegant WhatsApp conversion incentive tooltip */}
+      <AnimatePresence>
+        {showTooltip && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 10 }}
+            onClick={() => setShowTooltip(false)}
+            className="fixed bottom-22 right-6 z-40 bg-[#1A1712] text-white text-[10px] sm:text-[11px] font-mono tracking-wider px-4 py-2.5 rounded-lg shadow-2xl cursor-pointer border border-[#C9A84C]/40 flex items-center gap-1.5 hover:bg-black select-none max-w-[210px] transition-colors"
+          >
+            <span className="text-xs">👟</span>
+            <span className="font-bold">Order in 60 seconds →</span>
+            <span className="absolute bottom-[-5px] right-8 w-2.5 h-2.5 bg-[#1A1712] border-r border-b border-[#C9A84C]/40 rotate-45"></span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Floating Gold WhatsApp Order Button (Always Visible) */}
       <a
