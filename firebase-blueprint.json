@@ -1,0 +1,83 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User profile with administrative indicator status.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The firebase auth user UID" },
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "isAdmin": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "name", "email", "isAdmin"]
+    },
+    "AdminRef": {
+      "title": "Admin Reference Document",
+      "description": "Reference document to mark a specific UID as an administrator.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Order": {
+      "title": "Sneaker Order",
+      "description": "Premium SoleBox sneaker order.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "userName": { "type": "string" },
+        "items": { "type": "array" },
+        "total": { "type": "number" },
+        "date": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pending", "Confirmed", "Shipped", "Delivered"] },
+        "courierTracking": { "type": "string" },
+        "deliveryAddress": { "type": "string" },
+        "phone": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "userEmail", "userName", "items", "total", "date", "status"]
+    },
+    "Product": {
+      "title": "Sneaker Product",
+      "description": "Sneaker import item.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "brand": { "type": "string" },
+        "price": { "type": "number" },
+        "sizes": { "type": "array" },
+        "description": { "type": "string" },
+        "image": { "type": "string" },
+        "isCustomImport": { "type": "boolean" }
+      },
+      "required": ["id", "name", "brand", "price", "sizes", "description", "image"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile settings collection."
+    },
+    "/admins/{adminId}": {
+      "schema": "AdminRef",
+      "description": "Administrator roles registry."
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Cash-on-delivery orders tracking registry."
+    },
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Import sneaker products collection."
+    }
+  }
+}

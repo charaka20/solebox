@@ -1,0 +1,6 @@
+{
+  "name": "SoleBox LK",
+  "description": "Premium footwear imports in Sri Lanka - SoleBox LK customer portal with marketing and data tracking breakdown.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
