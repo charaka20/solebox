@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { MessageSquare } from "lucide-react";
 import { AppProvider, useApp } from "./context/AppContext";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
@@ -31,7 +32,7 @@ function MainAppContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F4EE] text-[#1a1814] font-sans noise-overlay selection:bg-[#C9A84C]/30 selection:text-[#C9A84C]">
+    <div className="min-h-screen bg-[#F7F4EE] text-[#1A1712] font-sans noise-overlay selection:bg-[#C9A84C]/30 selection:text-[#C9A84C]">
       
       {/* Prime Navigation */}
       <Header
@@ -92,6 +93,22 @@ function MainAppContent() {
           onClose={() => setIsAdminOpen(false)}
         />
       )}
+
+      {/* Floating Gold WhatsApp Order Button (Always Visible) */}
+      <a
+        href="https://wa.me/94722401093?text=Hi%20SoleBox%20LK!%20I'm%20visiting%20your%20curated%20store%20and%20would%20like%20to%20order%20premium%20shoes."
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-40 bg-[#C9A84C] hover:bg-[#b0913c] text-black font-mono font-black text-[10px] sm:text-xs uppercase tracking-[0.15em] py-3.5 px-5 rounded-full shadow-2xl flex items-center gap-2 border border-black/20 hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer"
+        title="Order via WhatsApp"
+      >
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-black opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-black"></span>
+        </span>
+        <MessageSquare size={13} className="fill-current text-black" />
+        <span>Order on WhatsApp</span>
+      </a>
 
     </div>
   );

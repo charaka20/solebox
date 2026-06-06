@@ -33,24 +33,27 @@ export default function Reviews() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {customerReviews.map((rev, index) => (
-          <div key={index} className="bg-[#FBF9F6] border border-[#e4e0da] p-6 rounded-sm space-y-4 hover:border-zinc-400 transition-colors flex flex-col justify-between shadow-sm">
+          <div key={index} className="bg-[#FDFCFB] border border-[#e4e0da] p-6 rounded-none space-y-4 hover:border-[#1A1712]/40 transition-colors flex flex-col justify-between shadow-sm">
             <div className="space-y-3">
               <div className="flex gap-0.5">
                 {[...Array(rev.rating)].map((_, i) => (
                   <Star key={i} size={11} className="fill-current text-[#C9A84C]" />
                 ))}
               </div>
-              <p className="font-sans text-xs sm:text-sm text-[#6b6860] italic leading-relaxed font-normal">
+              <p className="font-sans text-xs sm:text-sm text-[#4b4840] italic leading-relaxed font-normal">
                 "{rev.comment}"
               </p>
             </div>
 
-            <div className="flex items-center gap-2 pt-4 border-t border-[#e4e0da]/70">
+            <div className="flex items-center justify-between pt-4 border-t border-[#e4e0da]/70">
               <div className="flex items-center gap-1.5">
                 <span className="font-sans text-xs font-bold text-[#1a1814]">{rev.name}</span>
-                <span className="font-mono text-[9px] text-[#C9A84C] uppercase">{rev.city}</span>
+                <span className="font-mono text-[9px] bg-[#C9A84C]/10 text-[#C9A84C] px-1.5 py-0.5 rounded-none font-bold uppercase">{rev.city}</span>
               </div>
-              <Verified size={12} className="text-[#C9A84C]" />
+              <div className="flex items-center gap-1 text-[#C9A84C]">
+                <span className="font-mono text-[8px] uppercase font-bold tracking-wider">Verified Purchase</span>
+                <Verified size={11} className="fill-current" />
+              </div>
             </div>
           </div>
         ))}

@@ -7,6 +7,8 @@ export interface Product {
   description: string;
   sizes: number[];
   isCustomImport?: boolean; // flags if created dynamically by admin
+  outOfStock?: boolean; // dynamic stock levels tracking
+  sizeStock?: Record<string, number>; // Maps size (string-based) to available stock quantity
 }
 
 export interface CartItem {

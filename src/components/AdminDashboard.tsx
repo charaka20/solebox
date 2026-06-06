@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useApp } from "../context/AppContext";
 import { Product, Order } from "../types";
-import { Plus, ShieldAlert, Sparkles, Trash2 } from "lucide-react";
+import { Plus, ShieldAlert, Sparkles, Trash2, Bell, Mail } from "lucide-react";
 
 interface AdminDashboardProps {
   onClose: () => void;
@@ -27,9 +27,19 @@ const PRESET_IMAGES = [
 ];
 
 export default function AdminDashboard({ onClose }: AdminDashboardProps) {
-  const { orders, addNewProduct, updateOrderStatus, products, deleteProduct } = useApp();
+  const { 
+    orders, 
+    addNewProduct, 
+    updateOrderStatus, 
+    products, 
+    deleteProduct, 
+    toggleProductStock, 
+    notifications,
+    productStockMap,
+    updateProductStock
+  } = useApp();
 
-  const [activeTab, setActiveTab] = useState<"orders" | "add-shoe" | "manage-shoes">("add-shoe"); // Default tab directly onto user's requested shoe manager!
+  const [activeTab, setActiveTab] = useState<"orders" | "add-shoe" | "manage-shoes" | "stock-alerts">("add-shoe"); // Default tab directly onto user's requested shoe manager!
   
   // Custom Shoe Form State
   const [shoeName, setShoeName] = useState("");
@@ -40,9 +50,16 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
   const [selectedImage, setSelectedImage] = useState(PRESET_IMAGES[0].url);
   const [customImageUrl, setCustomImageUrl] = useState("");
   const [selectedSizes, setSelectedSizes] = useState<number[]>([40, 41, 42, 43, 44]);
+  const [formStock, setFormStock] = useState<Record<string, string>>({
+    "40": "5", "41": "5", "42": "5", "43": "5", "44": "5"
+  });
   const [formSuccess, setFormSuccess] = useState(false);
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Stock management inline editor states
+  const [editingStockProductId, setEditingStockProductId] = useState<string | null>(null);
+  const [tempStockMap, setTempStockMap] = useState<Record<string, number>>({});
 
   // Order status modification state variables
   const [selectedTracking, setSelectedTracking] = useState<Record<string, string>>({});
@@ -53,6 +70,9 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
       setSelectedSizes(selectedSizes.filter((s) => s !== size));
     } else {
       setSelectedSizes([...selectedSizes, size].sort((a, b) => a - b));
+      if (!formStock[String(size)]) {
+        setFormStock((prev) => ({ ...prev, [String(size)]: "5" }));
+      }
     }
   };
 
@@ -97,9 +117,16 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
       image: targetUrl,
     };
 
+    const sizeStockBuild: Record<string, number> = {};
+    selectedSizes.forEach((size) => {
+      const qtyStr = formStock[String(size)] || "5";
+      const parsed = parseInt(qtyStr, 10);
+      sizeStockBuild[String(size)] = isNaN(parsed) || parsed < 0 ? 0 : parsed;
+    });
+
     try {
       setIsSubmitting(true);
-      await addNewProduct(newShoeData);
+      await addNewProduct(newShoeData, sizeStockBuild);
       
       setFormSuccess(true);
       // Reset form variables
@@ -107,6 +134,7 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
       setShoeDescription("");
       setCustomBrand("");
       setCustomImageUrl("");
+      setFormStock({ "40": "5", "41": "5", "42": "5", "43": "5", "44": "5" });
     } catch (err: any) {
       setFormError(err?.message || "Sneaker upload failed.");
     } finally {
@@ -151,7 +179,7 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
         </div>
 
         {/* Console Nav Tabs */}
-        <div className="flex border-b border-zinc-900 font-mono text-xs">
+        <div className="flex border-b border-zinc-900 font-mono text-xs overflow-x-auto">
           <button
             id="tab-add-shoe"
             onClick={() => {
@@ -159,7 +187,7 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
               setFormSuccess(false);
               setFormError("");
             }}
-            className={`flex-1 py-4 uppercase text-center tracking-wider border-b-2 cursor-pointer transition-colors ${
+            className={`flex-1 min-w-[130px] sm:min-w-0 py-4 uppercase text-center tracking-wider border-b-2 cursor-pointer transition-colors ${
               activeTab === "add-shoe"
                 ? "border-[#C9A84C] text-[#C9A84C] font-black bg-zinc-900/30"
                 : "border-transparent text-zinc-500 hover:text-zinc-300"
@@ -171,7 +199,7 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
           <button
             id="tab-orders"
             onClick={() => setActiveTab("orders")}
-            className={`flex-1 py-4 uppercase text-center tracking-wider border-b-2 cursor-pointer transition-colors ${
+            className={`flex-1 min-w-[130px] sm:min-w-0 py-4 uppercase text-center tracking-wider border-b-2 cursor-pointer transition-colors ${
               activeTab === "orders"
                 ? "border-[#C9A84C] text-[#C9A84C] font-black bg-zinc-900/30"
                 : "border-transparent text-zinc-500 hover:text-zinc-300"
@@ -183,13 +211,25 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
           <button
             id="tab-manage-shoes"
             onClick={() => setActiveTab("manage-shoes")}
-            className={`flex-1 py-4 uppercase text-center tracking-wider border-b-2 cursor-pointer transition-colors ${
+            className={`flex-1 min-w-[130px] sm:min-w-0 py-4 uppercase text-center tracking-wider border-b-2 cursor-pointer transition-colors ${
               activeTab === "manage-shoes"
                 ? "border-[#C9A84C] text-[#C9A84C] font-black bg-zinc-900/30"
                 : "border-transparent text-zinc-500 hover:text-zinc-300"
             }`}
           >
             MANAGE CATALOG ({products.length})
+          </button>
+
+          <button
+            id="tab-stock-alerts"
+            onClick={() => setActiveTab("stock-alerts")}
+            className={`flex-1 min-w-[130px] sm:min-w-0 py-4 uppercase text-center tracking-wider border-b-2 cursor-pointer transition-colors ${
+              activeTab === "stock-alerts"
+                ? "border-[#C9A84C] text-[#C9A84C] font-black bg-zinc-900/30"
+                : "border-transparent text-zinc-500 hover:text-zinc-300"
+            }`}
+          >
+            STOCK ALERTS ({notifications.length})
           </button>
         </div>
 
@@ -323,6 +363,41 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
                         );
                       })}
                     </div>
+
+                    {selectedSizes.length > 0 && (
+                      <div className="mt-4 bg-zinc-900/40 p-4 border border-zinc-900 rounded space-y-3 animate-reveal">
+                        <div className="flex items-center gap-1.5 text-[#C9A84C] font-mono text-[9px] uppercase tracking-wider font-bold">
+                          <span className="flex h-1.5 w-1.5 rounded-full bg-[#C9A84C]" />
+                          <span>Define Stock Quantity per Size Arrival</span>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                          {selectedSizes.map((size) => (
+                            <div key={size} className="space-y-1">
+                              <span className="block font-mono text-[8px] text-zinc-400 uppercase tracking-wide">EUR {size} Qty</span>
+                              <input
+                                id={`form-stock-size-${size}`}
+                                type="number"
+                                min="0"
+                                required
+                                placeholder="5"
+                                value={formStock[String(size)] || "5"}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setFormStock((prev) => ({
+                                    ...prev,
+                                    [String(size)]: val
+                                  }));
+                                }}
+                                className="w-full bg-zinc-950 border border-zinc-850 focus:border-[#C9A84C] focus:ring-1 focus:ring-[#C9A84C] outline-none text-xs text-white p-2 rounded font-mono text-center"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                        <div className="text-[9.5px] font-mono text-zinc-500">
+                          Cumulative arrival stock: <span className="text-[#C9A84C] font-black">{selectedSizes.reduce((sum, size) => sum + parseInt(formStock[String(size)] || "0", 10), 0)} pairs</span>. If cumulative stock reaches 0, the sneaker will trigger raw OUT OF STOCK warnings.
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Unsplash Preset selection versus custom picture URL */}
@@ -530,70 +605,258 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
                 <div className="bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded font-mono text-[10px] text-zinc-350 font-bold">
                   TOTAL LIVE DROPS: <span className="text-[#C9A84C] font-black">{products.length}</span>
                 </div>
-              </div>
+              </div>              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {products.map((product) => {
+                  const sizeStock = productStockMap[product.id] || {};
+                  const sizeKeys = Object.keys(sizeStock);
+                  const cumulativeStock = sizeKeys.reduce((sum, s) => sum + (sizeStock[s] || 0), 0);
+                  const isCumulativeOutOfStock = sizeKeys.length > 0 && cumulativeStock === 0;
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {products.map((product) => (
-                  <div
-                    key={product.id}
-                    className="border border-zinc-900 bg-zinc-950/60 p-4 rounded flex gap-4 items-start hover:border-zinc-800 transition-all justify-between animate-reveal"
-                  >
-                    <div className="flex gap-3 items-center min-w-0">
-                      {/* Compact Image */}
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        referrerPolicy="no-referrer"
-                        className="w-16 h-16 object-cover rounded border border-zinc-900 flex-shrink-0"
-                      />
-                      
-                      <div className="min-w-0 space-y-1">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-mono text-[8.5px] bg-zinc-900 px-1.5 py-0.5 rounded text-zinc-400 uppercase font-black tracking-widest border border-zinc-800">
-                            {product.brand}
-                          </span>
-                          {product.isCustomImport ? (
-                            <span className="font-mono text-[8.5px] bg-[#C9A84C]/10 text-[#C9A84C] px-1.5 py-0.5 rounded uppercase font-black border border-[#C9A84C]/20">
-                              CUSTOM Drop
-                            </span>
-                          ) : (
-                            <span className="font-mono text-[8px] bg-zinc-900/60 text-zinc-600 px-1.5 py-0.5 rounded uppercase border border-zinc-900">
-                              Base Drop
-                            </span>
-                          )}
+                  return (
+                    <div
+                      key={product.id}
+                      className="border border-zinc-900 bg-zinc-950/60 p-4 rounded flex flex-col gap-4 hover:border-zinc-800 transition-all justify-between animate-reveal shadow-sm"
+                    >
+                      <div className="flex gap-4 items-start justify-between min-w-0">
+                        <div className="flex gap-3 items-center min-w-0">
+                          {/* Compact Image */}
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            referrerPolicy="no-referrer"
+                            className="w-16 h-16 object-cover rounded border border-zinc-900 flex-shrink-0"
+                          />
+                          
+                          <div className="min-w-0 space-y-1">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="font-mono text-[8.5px] bg-zinc-900 px-1.5 py-0.5 rounded text-zinc-400 uppercase font-black tracking-widest border border-zinc-800">
+                                {product.brand}
+                              </span>
+                              {product.isCustomImport ? (
+                                <span className="font-mono text-[8.5px] bg-[#C9A84C]/10 text-[#C9A84C] px-1.5 py-0.5 rounded uppercase font-black border border-[#C9A84C]/20">
+                                  CUSTOM Drop
+                                </span>
+                              ) : (
+                                <span className="font-mono text-[8px] bg-zinc-900/60 text-zinc-600 px-1.5 py-0.5 rounded uppercase border border-zinc-900">
+                                  Base Drop
+                                </span>
+                              )}
+                            </div>
+                            <h5 className="font-sans font-bold text-xs text-white truncate max-w-[150px] sm:max-w-xs" title={product.name}>
+                              {product.name}
+                            </h5>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-display text-xs text-[#C9A84C] font-black">
+                                LKR {product.price.toLocaleString()}
+                              </span>
+                              <span className="text-[10px] text-zinc-500">•</span>
+                              <span className={`font-mono text-[9px] uppercase font-bold ${
+                                isCumulativeOutOfStock
+                                  ? "text-red-400 bg-red-950/10 px-1.5 py-0.5 rounded border border-red-900/30"
+                                  : "text-zinc-400 font-normal"
+                              }`}>
+                                {isCumulativeOutOfStock ? "⚠️ Out of Stock (0 pairs)" : `📦 Stock: ${cumulativeStock} pairs`}
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap gap-1 pt-1">
+                              {product.sizes.map((s) => {
+                                const qty = sizeStock[String(s)] ?? 0;
+                                return (
+                                  <span 
+                                    key={s} 
+                                    className={`font-mono text-[8px] border px-1 py-0.5 rounded flex items-center gap-1 ${
+                                      qty === 0
+                                        ? "text-red-500/70 border-red-950/30 bg-red-950/5"
+                                        : "text-zinc-500 border-zinc-900 bg-zinc-900/20"
+                                    }`}
+                                    title={`EUR ${s}: ${qty} available`}
+                                  >
+                                    <span>#{s}</span>
+                                    <span className={`font-black ${qty === 0 ? "text-red-400" : "text-zinc-300"}`}>({qty})</span>
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          </div>
                         </div>
-                        <h5 className="font-sans font-bold text-xs text-white truncate max-w-[150px] sm:max-w-xs" title={product.name}>
-                          {product.name}
-                        </h5>
-                        <p className="font-display text-xs text-[#C9A84C] font-black">
-                          LKR {product.price.toLocaleString()}
-                        </p>
-                        <div className="flex flex-wrap gap-1 pt-1">
-                          {product.sizes.map((s) => (
-                            <span key={s} className="font-mono text-[8px] text-zinc-550 border border-zinc-900 px-1 rounded">
-                              {s}
-                            </span>
-                          ))}
+
+                        {/* Action Triggers */}
+                        <div className="flex gap-2 flex-shrink-0 items-center">
+                          <button
+                            id={`toggle-stock-${product.id}`}
+                            onClick={() => toggleProductStock(product.id)}
+                            className={`font-mono text-[9px] font-bold px-2 py-1.5 uppercase rounded-sm border cursor-pointer transition-all ${
+                              product.outOfStock
+                                ? "border-amber-900/50 bg-amber-950/20 text-amber-500 hover:bg-amber-900/20"
+                                : "border-emerald-900/30 bg-emerald-950/10 text-emerald-500 hover:bg-emerald-950/15"
+                            }`}
+                            title={product.outOfStock ? "Reinstate back-in-stock immediately" : "Flag as temporarily out of stock"}
+                          >
+                            {product.outOfStock ? "🛋️ Out of Stock" : "🔥 In Stock"}
+                          </button>
+
+                          <button
+                            id={`delete-product-${product.id}`}
+                            onClick={() => {
+                              if (confirm(`Are you certain you want to remove "${product.name}" from the active store?`)) {
+                                deleteProduct(product.id);
+                              }
+                            }}
+                            className="border border-zinc-900 hover:border-red-900/30 bg-zinc-950 p-2 text-zinc-450 hover:text-red-400 hover:bg-red-950/10 rounded cursor-pointer transition-colors"
+                            title="Decommission drop immediately"
+                          >
+                            <Trash2 size={13} />
+                          </button>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Action Triggers */}
-                    <button
-                      id={`delete-product-${product.id}`}
-                      onClick={() => {
-                        if (confirm(`Are you certain you want to remove "${product.name}" from the active store?`)) {
-                          deleteProduct(product.id);
-                        }
-                      }}
-                      className="border border-zinc-900 hover:border-red-900/30 bg-zinc-950 p-2 text-zinc-450 hover:text-red-400 hover:bg-red-950/10 rounded cursor-pointer transition-colors"
-                      title="Decommission drop immediately"
-                    >
-                      <Trash2 size={13} />
-                    </button>
-                  </div>
-                ))}
+                      {/* Interactive size-stock inline editor */}
+                      <div className="border-t border-zinc-900/50 pt-2.5">
+                        <button
+                          id={`edit-stock-toggle-${product.id}`}
+                          onClick={() => {
+                            if (editingStockProductId === product.id) {
+                              setEditingStockProductId(null);
+                            } else {
+                              setEditingStockProductId(product.id);
+                              const initStock: Record<string, number> = {};
+                              product.sizes.forEach((s) => {
+                                initStock[String(s)] = sizeStock[String(s)] ?? 5;
+                              });
+                              setTempStockMap(initStock);
+                            }
+                          }}
+                          className={`w-full text-center py-1.5 font-mono text-[9px] uppercase tracking-wider border rounded transition-all cursor-pointer ${
+                            editingStockProductId === product.id
+                              ? "bg-zinc-900 border-zinc-800 text-[#C9A84C]"
+                              : "bg-zinc-950/40 border-zinc-900/80 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/20"
+                          }`}
+                        >
+                          {editingStockProductId === product.id ? "Close Restock Panel" : "⚙️ Modify Size Stock Quantities"}
+                        </button>
+
+                        {editingStockProductId === product.id && (
+                          <div className="mt-3 p-3 bg-zinc-900/20 border border-zinc-900 rounded space-y-3 animate-reveal">
+                            <div className="flex justify-between items-center">
+                              <span className="font-mono text-[8px] uppercase text-[#C9A84C] font-semibold">Restock quantities allocation</span>
+                              <span className="font-mono text-[7px] text-zinc-500 uppercase">Save to write to live drop</span>
+                            </div>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                              {product.sizes.map((s) => {
+                                const qty = tempStockMap[String(s)] ?? 0;
+                                return (
+                                  <div key={s} className="flex flex-col items-center bg-zinc-950 border border-zinc-900 p-1.5 rounded">
+                                    <span className="font-mono text-[8.5px] text-zinc-400">EUR {s}</span>
+                                    <div className="flex items-center gap-1.5 mt-1.5">
+                                      <button
+                                        id={`dec-stock-${product.id}-${s}`}
+                                        type="button"
+                                        onClick={() => {
+                                          setTempStockMap((prev) => ({
+                                            ...prev,
+                                            [String(s)]: Math.max(0, qty - 1)
+                                          }));
+                                        }}
+                                        className="w-5 h-5 bg-zinc-900 border border-zinc-850 hover:bg-zinc-800 text-zinc-300 rounded text-[10px] leading-none flex items-center justify-center cursor-pointer select-none"
+                                      >
+                                        -
+                                      </button>
+                                      <span className="font-mono text-[10px] text-white min-w-[20px] text-center font-bold">
+                                        {qty}
+                                      </span>
+                                      <button
+                                        id={`inc-stock-${product.id}-${s}`}
+                                        type="button"
+                                        onClick={() => {
+                                          setTempStockMap((prev) => ({
+                                            ...prev,
+                                            [String(s)]: qty + 1
+                                          }));
+                                        }}
+                                        className="w-5 h-5 bg-zinc-900 border border-zinc-850 hover:bg-zinc-800 text-[#C9A84C] rounded text-[10px] leading-none flex items-center justify-center cursor-pointer select-none font-bold"
+                                      >
+                                        +
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            <button
+                              id={`save-stock-btn-${product.id}`}
+                              type="button"
+                              onClick={async () => {
+                                await updateProductStock(product.id, tempStockMap);
+                                setEditingStockProductId(null);
+                              }}
+                              className="w-full bg-[#C9A84C]/90 hover:bg-[#C9A84C] text-black font-mono text-[9px] uppercase tracking-wider font-extrabold py-2 rounded transition-all text-center cursor-pointer"
+                            >
+                              Save Sneaker Restock Level
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
+            </div>
+          )}
+
+          {activeTab === "stock-alerts" && (
+            <div className="max-w-3xl mx-auto space-y-6">
+              <div className="flex justify-between items-center pb-2 border-b border-zinc-900">
+                <div>
+                  <h4 className="font-display font-black text-lg text-white uppercase">STOCK ALERT REQUESTS ({notifications.length})</h4>
+                  <p className="font-sans text-xs text-zinc-400 font-normal">
+                    Real-time sneaker notification requests submitted by visitors. Re-stocking these products alerts the clients.
+                  </p>
+                </div>
+              </div>
+
+              {notifications.length === 0 ? (
+                <div id="no-notifications-alert" className="border border-dashed border-zinc-900 py-12 text-center text-zinc-500 rounded">
+                  <Bell size={24} className="mx-auto mb-2 text-zinc-700" />
+                  <p className="font-mono text-[10px] uppercase tracking-wider">No pending restock notifications</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {notifications.map((notif: any) => (
+                    <div
+                      key={notif.id}
+                      className="border border-zinc-900 bg-zinc-950 p-4 rounded flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-sans animate-reveal"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-[9px] bg-[#C9A84C]/10 text-[#C9A84C] px-1.5 py-0.5 rounded font-black tracking-wider border border-[#C9A84C]/25">
+                            SIZE: {notif.size || "Any"}
+                          </span>
+                          <span className="font-mono text-[8.5px] text-zinc-500">
+                            {new Date(notif.createdAt).toLocaleString()}
+                          </span>
+                        </div>
+                        <h5 className="font-bold text-xs text-white">
+                          Requested item: <span className="text-[#C9A84C]">{notif.productName}</span>
+                        </h5>
+                        <p className="text-[#C9A84C] font-mono text-[11px] font-medium hover:underline flex items-center gap-1">
+                          <Mail size={10} />
+                          <span>{notif.userEmail}</span>
+                        </p>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <a
+                          id={`email-notif-client-${notif.id}`}
+                          href={`mailto:${notif.userEmail}?subject=SoleBox restock on ${encodeURIComponent(notif.productName)}!&body=Hi there,%0A%0AWe are writing to notify you that the ${encodeURIComponent(notif.productName)} in size ${notif.size} is now back in stock!%0A%0AOrder here: https://solebox-lk.com%0A%0ABest regards,%0AThe SoleBox LK Team`}
+                          className="px-3.5 py-2 bg-[#C9A84C] hover:bg-[#b0913c] text-black font-mono text-[9px] uppercase tracking-wider font-extrabold rounded-sm transition-all text-center"
+                        >
+                          Email Alert
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

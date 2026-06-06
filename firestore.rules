@@ -119,5 +119,21 @@ service cloud.firestore {
       );
       allow delete: if isAdmin();
     }
+
+    // 6. Back-In-Stock notifications validation (anyone can subscribe, only admins can manage requests)
+    function isValidNotification(data) {
+      return data.keys().hasAll(['id', 'productId', 'productName', 'userEmail', 'createdAt'])
+        && data.id is string && data.id.size() <= 128
+        && data.productId is string && data.productId.size() <= 128
+        && data.productName is string && data.productName.size() <= 150
+        && data.userEmail is string && data.userEmail.size() <= 128 && data.userEmail.size() > 0
+        && data.createdAt is string && data.createdAt.size() <= 64
+        && (!('size' in data) || (data.size is int || data.size is float));
+    }
+
+    match /notifications/{notificationId} {
+      allow create: if isValidNotification(incoming());
+      allow read, delete: if isAdminStatic() || isAdmin();
+    }
   }
 }

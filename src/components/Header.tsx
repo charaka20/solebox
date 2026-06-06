@@ -26,7 +26,7 @@ export default function Header({
         {/* Brand signature Logo */}
         <div className="flex items-center gap-2 group">
           <Disc size={20} className="text-[#C9A84C] animate-spin" style={{ animationDuration: "12s" }} />
-          <span className="font-display font-black text-lg sm:text-xl tracking-[0.25em] text-[#1a1814] select-none cursor-pointer">
+          <span className="font-display font-black text-lg sm:text-xl tracking-[0.25em] text-[#1A1712] select-none cursor-pointer">
             SOLE<span className="text-[#C9A84C]">BOX</span> <span className="font-sans text-[9px] tracking-widest uppercase text-zinc-400">LK</span>
           </span>
         </div>
@@ -36,7 +36,7 @@ export default function Header({
           <button
             id="nav-shop-btn"
             onClick={onOrderClick}
-            className="hidden sm:inline-flex text-xs font-mono font-bold tracking-widest text-[#1a1814]/70 hover:text-black uppercase cursor-pointer select-none py-1.5 px-3 transition-colors"
+            className="hidden sm:inline-flex text-xs font-mono font-bold tracking-widest text-[#1A1712]/70 hover:text-black uppercase cursor-pointer select-none py-1.5 px-3 transition-colors"
           >
             Collection
           </button>
@@ -46,7 +46,7 @@ export default function Header({
               const el = document.getElementById("philosophy");
               if (el) el.scrollIntoView({ behavior: "smooth" });
             }}
-            className="hidden sm:inline-flex text-xs font-mono font-bold tracking-widest text-[#1a1814]/70 hover:text-black uppercase cursor-pointer select-none py-1.5 px-3 transition-colors"
+            className="hidden sm:inline-flex text-xs font-mono font-bold tracking-widest text-[#1A1712]/70 hover:text-black uppercase cursor-pointer select-none py-1.5 px-3 transition-colors"
           >
             Story
           </button>
@@ -56,7 +56,7 @@ export default function Header({
               const el = document.getElementById("delivery");
               if (el) el.scrollIntoView({ behavior: "smooth" });
             }}
-            className="hidden sm:inline-flex text-xs font-mono font-bold tracking-widest text-[#1a1814]/70 hover:text-black uppercase cursor-pointer select-none py-1.5 px-3 transition-colors"
+            className="hidden sm:inline-flex text-xs font-mono font-bold tracking-widest text-[#1A1712]/70 hover:text-black uppercase cursor-pointer select-none py-1.5 px-3 transition-colors"
           >
             Delivery
           </button>
@@ -77,12 +77,12 @@ export default function Header({
           <button
             id="header-cart-btn"
             onClick={onOpenCart}
-            className="relative flex items-center justify-center border border-[#e4e0da] hover:border-zinc-400 bg-white p-2.5 rounded cursor-pointer text-[#1a1814] hover:text-[#C9A84C] transition-all"
+            className="relative flex items-center justify-center border border-[#e4e0da] hover:border-zinc-400 bg-white p-2.5 rounded cursor-pointer text-[#1A1712] hover:text-[#C9A84C] transition-all"
             title="Open Accumulated Cart"
           >
             <ShoppingBag size={15} />
             {totalCartQty > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#1a1814] text-[9px] font-black text-[#F7F4EE] px-1 leading-none shadow-md">
+              <span className="absolute -top-1.5 -right-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#1A1712] text-[9px] font-black text-[#F7F4EE] px-1 leading-none shadow-md">
                 {totalCartQty}
               </span>
             )}
@@ -113,7 +113,7 @@ export default function Header({
             <button
               id="header-login-btn"
               onClick={onOpenAuth}
-              className="bg-[#1a1814] hover:bg-zinc-800 text-white font-mono font-bold text-[10px] sm:text-xs tracking-widest py-2 px-4 rounded transition-all cursor-pointer select-none"
+              className="bg-[#1A1712] hover:bg-zinc-800 text-white font-mono font-bold text-[10px] sm:text-xs tracking-widest py-2 px-4 rounded transition-all cursor-pointer select-none"
             >
               SIGN IN
             </button>

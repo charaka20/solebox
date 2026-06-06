@@ -20,7 +20,7 @@ export default function ProcessSection() {
   ];
 
   return (
-    <section id="process" className="bg-[#1a1814] text-[#F7F4EE] py-16 scroll-mt-20 border-t border-[#e4e0da]/10">
+    <section id="process" className="bg-[#1A1712] text-[#F7F4EE] py-16 scroll-mt-20 border-t border-[#e4e0da]/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         
         {/* Title */}
@@ -33,7 +33,7 @@ export default function ProcessSection() {
           {steps.map((step, index) => (
             <div key={index} className="bg-[#24221c]/50 border border-[#2e2c24] p-6 sm:p-8 rounded-sm space-y-4 hover:border-[#C9A84C]/30 transition-colors">
               <div className="flex items-center justify-between">
-                <div className="bg-[#1a1814] p-2.5 rounded border border-[#2e2c24]">
+                <div className="bg-[#1A1712] p-2.5 rounded border border-[#2e2c24]">
                   {step.icon}
                 </div>
                 <div className="font-mono text-xs text-[#C9A84C] tracking-widest font-black">

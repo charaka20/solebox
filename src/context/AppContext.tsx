@@ -23,6 +23,7 @@ interface AppContextType {
   cart: CartItem[];
   orders: Order[];
   products: Product[];
+  notifications: any[];
   login: (email: string, name?: string) => User;
   logout: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -32,8 +33,12 @@ interface AppContextType {
   clearCart: () => void;
   placeOrder: (address: string, phone: string) => Promise<Order>;
   updateOrderStatus: (orderId: string, status: Order["status"], courierTracking?: string) => Promise<void>;
-  addNewProduct: (product: Omit<Product, "isCustomImport">) => Promise<void>;
+  addNewProduct: (product: Omit<Product, "isCustomImport">, sizeStock?: Record<string, number>) => Promise<void>;
   deleteProduct: (productId: string) => Promise<void>;
+  subscribeToStockAlert: (productId: string, productName: string, userEmail: string, size?: number) => Promise<void>;
+  toggleProductStock: (productId: string) => Promise<void>;
+  productStockMap: Record<string, Record<string, number>>;
+  updateProductStock: (productId: string, sizeStock: Record<string, number>) => Promise<void>;
   isAdmin: boolean;
 }
 
@@ -111,12 +116,49 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : [];
   });
 
+  // Keep track of out of stock products (both static and custom)
+  // Let's mark the Yeezy Boost V2 (or another shoe) as out of stock by default to demonstrate the 'Notify Me' feature right out of the box!
+  const [outOfStockProductIds, setOutOfStockProductIds] = useState<string[]>(() => {
+    const saved = localStorage.getItem("sb_out_of_stock_product_ids");
+    return saved ? JSON.parse(saved) : ["snkr-nb-550"]; // New Balance 550 ALD Out of Stock by default
+  });
+
+  // Track stock notification requests for administrators
+  const [notifications, setNotifications] = useState<any[]>(() => {
+    const saved = localStorage.getItem("sb_notifications");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // Track stock level maps (product ID -> size string -> quantity)
+  const [productStockMap, setProductStockMap] = useState<Record<string, Record<string, number>>>(() => {
+    const saved = localStorage.getItem("sb_product_stock_map");
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    const defaults: Record<string, Record<string, number>> = {};
+    // Jordan 1 Travis Scott
+    defaults["snkr-aj1-ts"] = { "40": 8, "41": 5, "42": 12, "43": 7, "44": 15, "45": 4 };
+    // New Balance 550 ALD - Out of stock by default to show "Notify Me" trigger
+    defaults["snkr-nb-550"] = { "39": 0, "40": 0, "41": 0, "42": 0, "43": 0, "44": 0 };
+    // Dunk Low Panda Noir
+    defaults["snkr-dunk-low"] = { "40": 10, "41": 15, "42": 24, "43": 18, "44": 8, "45": 3 };
+    // Yeezy Boost 350 Onyx
+    defaults["snkr-yz-350"] = { "41": 6, "42": 9, "43": 14, "44": 11, "45": 5 };
+    return defaults;
+  });
+
+  // Persist productStockMap changes
+  useEffect(() => {
+    localStorage.setItem("sb_product_stock_map", JSON.stringify(productStockMap));
+  }, [productStockMap]);
+
   // 1. Firebase Auth listener to automatically synchronize logins
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         const isUserAdmin = 
           firebaseUser.email?.toLowerCase() === "charakaviduranga2@gmail.com" || 
+          firebaseUser.email?.toLowerCase() === "hkrumesh@gmail.com" || 
           firebaseUser.email?.toLowerCase() === "soleboxlk@gmail.com" || 
           !!firebaseUser.email?.toLowerCase().includes("admin");
           
@@ -201,10 +243,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       q,
       (snapshot) => {
         const liveProducts: Product[] = [];
+        const stockUpdates: Record<string, Record<string, number>> = {};
         snapshot.forEach((docSnap) => {
-          liveProducts.push(docSnap.data() as Product);
+          const prod = docSnap.data() as Product;
+          liveProducts.push(prod);
+          if (prod.sizeStock) {
+            stockUpdates[prod.id] = prod.sizeStock;
+          }
         });
         setCustomProducts(liveProducts);
+        
+        if (Object.keys(stockUpdates).length > 0) {
+          setProductStockMap((prev) => ({
+            ...prev,
+            ...stockUpdates
+          }));
+        }
       },
       (error) => {
         console.warn("Could not load products in real-time from Firestore (falling back to cached local):", error.message);
@@ -213,6 +267,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     return () => unsubscribe();
   }, []);
+
+  // 4. Synchronize stock alerts / notifications in real-time for admins
+  useEffect(() => {
+    if (!currentUser || !currentUser.isAdmin) {
+      return;
+    }
+
+    const q = collection(db, "notifications");
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const liveNotifs: any[] = [];
+        snapshot.forEach((docSnap) => {
+          liveNotifs.push(docSnap.data());
+        });
+        liveNotifs.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+        setNotifications(liveNotifs);
+      },
+      (error) => {
+        console.warn("Could not load notifications collection from Firestore:", error.message);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [currentUser]);
 
   // Sync state variables with caching storage
   useEffect(() => {
@@ -248,6 +327,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       
       const isUserAdmin = 
         firebaseUser.email?.toLowerCase() === "charakaviduranga2@gmail.com" || 
+        firebaseUser.email?.toLowerCase() === "hkrumesh@gmail.com" || 
         firebaseUser.email?.toLowerCase() === "soleboxlk@gmail.com" || 
         !!firebaseUser.email?.toLowerCase().includes("admin");
         
@@ -280,6 +360,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const login = (email: string, name?: string) => {
     const isUserAdmin = 
       email.toLowerCase() === "charakaviduranga2@gmail.com" || 
+      email.toLowerCase() === "hkrumesh@gmail.com" || 
       email.toLowerCase() === "soleboxlk@gmail.com" || 
       email.toLowerCase().includes("admin");
     const formattedName = name || (isUserAdmin ? "SoleBox Admin" : email.split("@")[0]);
@@ -307,16 +388,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addToCart = (product: Product, size: number, quantity = 1) => {
+    // Determine configured stock level
+    const sizeStock = productStockMap[product.id] || {};
+    const hasStockConfig = Object.keys(sizeStock).length > 0;
+    
+    // Default to fallback limit of 5 if no specific stock configuration defined
+    const limit = hasStockConfig ? (sizeStock[String(size)] ?? 5) : 5;
+
     setCart((prev) => {
       const existingIndex = prev.findIndex(
         (item) => item.product.id === product.id && item.size === size
       );
       if (existingIndex > -1) {
         const copy = [...prev];
-        copy[existingIndex].quantity += quantity;
+        const newQty = copy[existingIndex].quantity + quantity;
+        if (newQty > limit) {
+          copy[existingIndex].quantity = limit;
+          return copy;
+        }
+        copy[existingIndex].quantity = newQty;
         return copy;
       }
-      return [...prev, { product, size, quantity }];
+      
+      const cappedQty = Math.min(quantity, limit);
+      if (cappedQty <= 0) {
+        // If out of stock, do not add to cart
+        return prev;
+      }
+      return [...prev, { product, size, quantity: cappedQty }];
     });
   };
 
@@ -329,9 +428,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       removeFromCart(productId, size);
       return;
     }
+
+    // Determine configured stock level
+    const sizeStock = productStockMap[productId] || {};
+    const hasStockConfig = Object.keys(sizeStock).length > 0;
+    const limit = hasStockConfig ? (sizeStock[String(size)] ?? 5) : 5;
+    
+    const cappedQty = Math.min(quantity, limit);
+
     setCart((prev) =>
       prev.map((item) =>
-        item.product.id === productId && item.size === size ? { ...item, quantity } : item
+        item.product.id === productId && item.size === size ? { ...item, quantity: cappedQty } : item
       )
     );
   };
@@ -376,6 +483,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setOrders((prev) => [newOrder, ...prev]);
     }
 
+    // Deduct stock levels for purchased quantities
+    setProductStockMap((prev) => {
+      const next = { ...prev };
+      cart.forEach((item) => {
+        const prodId = item.product.id;
+        const selectedSizeStr = String(item.size);
+        if (!next[prodId]) {
+          next[prodId] = {};
+        }
+        const currentQty = next[prodId][selectedSizeStr] ?? 5; // default fallback if none configured
+        next[prodId][selectedSizeStr] = Math.max(0, currentQty - item.quantity);
+        
+        // Also update the custom product in state/Database asynchronously
+        const isCustom = customProducts.find((p) => p.id === prodId);
+        if (isCustom) {
+          const updatedSizeStock = { ...next[prodId] };
+          setCustomProducts((cp) => {
+            const nextCp = cp.map((p) => p.id === prodId ? { ...p, sizeStock: updatedSizeStock } : p);
+            localStorage.setItem("sb_custom_products", JSON.stringify(nextCp));
+            return nextCp;
+          });
+          if (auth.currentUser) {
+            updateDoc(doc(db, "products", prodId), {
+              sizeStock: updatedSizeStock
+            }).catch((err) => console.warn("Silent order stock sync fail:", err));
+          }
+        }
+      });
+      return next;
+    });
+
     clearCart();
     return newOrder;
   };
@@ -408,11 +546,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Add a new dynamic product to database or local catalog state
-  const addNewProduct = async (productData: Omit<Product, "isCustomImport">) => {
+  const addNewProduct = async (productData: Omit<Product, "isCustomImport">, sizeStock?: Record<string, number>) => {
     const newProduct: Product = {
       ...productData,
       isCustomImport: true,
+      ...(sizeStock ? { sizeStock } : {})
     };
+
+    if (sizeStock) {
+      setProductStockMap((prev) => ({
+        ...prev,
+        [newProduct.id]: sizeStock
+      }));
+    }
 
     if (auth.currentUser) {
       try {
@@ -421,7 +567,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         handleFirestoreError(err, OperationType.CREATE, `products/${newProduct.id}`);
       }
     } else {
-      setCustomProducts((prev) => [...prev, newProduct]);
+      setCustomProducts((prev) => {
+        const updated = [...prev, newProduct];
+        localStorage.setItem("sb_custom_products", JSON.stringify(updated));
+        return updated;
+      });
     }
   };
 
@@ -439,16 +589,115 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         console.warn("Could not delete from Firestore:", err);
       }
     } else {
-      setCustomProducts((prev) => prev.filter((p) => p.id !== productId));
+      setCustomProducts((prev) => {
+        const next = prev.filter((p) => p.id !== productId);
+        localStorage.setItem("sb_custom_products", JSON.stringify(next));
+        return next;
+      });
+    }
+  };
+
+  // Submit back-in-stock notification alert subscriptions
+  const subscribeToStockAlert = async (productId: string, productName: string, userEmail: string, size?: number) => {
+    const notificationId = "NTF-" + Math.floor(10000 + Math.random() * 90000);
+    const newAlert = {
+      id: notificationId,
+      productId,
+      productName,
+      userEmail: userEmail.toLowerCase().trim(),
+      createdAt: new Date().toISOString(),
+      ...(size ? { size } : {})
+    };
+
+    try {
+      await setDoc(doc(db, "notifications", notificationId), newAlert);
+      
+      setNotifications((prev) => {
+        const next = [newAlert, ...prev.filter((n) => n.id !== notificationId)];
+        localStorage.setItem("sb_notifications", JSON.stringify(next));
+        return next;
+      });
+    } catch (err) {
+      console.warn("Could not write notification request to Firestore (saving locally):", err);
+      setNotifications((prev) => {
+        const next = [newAlert, ...prev.filter((n) => n.id !== notificationId)];
+        localStorage.setItem("sb_notifications", JSON.stringify(next));
+        return next;
+      });
+    }
+  };
+
+  // Toggle stock level status for a product (works for both base drops & custom drops!)
+  const toggleProductStock = async (productId: string) => {
+    const isNowOut = !outOfStockProductIds.includes(productId);
+    
+    setOutOfStockProductIds((prev) => {
+      const next = prev.includes(productId) 
+        ? prev.filter((id) => id !== productId) 
+        : [...prev, productId];
+      localStorage.setItem("sb_out_of_stock_product_ids", JSON.stringify(next));
+      return next;
+    });
+
+    const isCustom = customProducts.some((p) => p.id === productId);
+    if (isCustom && auth.currentUser) {
+      try {
+        await updateDoc(doc(db, "products", productId), {
+          outOfStock: isNowOut
+        });
+      } catch (err) {
+        console.warn("Could not synchronize out of stock level trigger to Firestore doc:", err);
+      }
+    }
+  };
+
+  // Update size-specific stock and recalculate status
+  const updateProductStock = async (productId: string, sizeStock: Record<string, number>) => {
+    setProductStockMap((prev) => ({
+      ...prev,
+      [productId]: sizeStock
+    }));
+
+    const isCustom = customProducts.some((p) => p.id === productId);
+    if (isCustom) {
+      setCustomProducts((prev) => {
+        const next = prev.map((p) => p.id === productId ? { ...p, sizeStock } : p);
+        localStorage.setItem("sb_custom_products", JSON.stringify(next));
+        return next;
+      });
+
+      if (auth.currentUser) {
+        try {
+          await updateDoc(doc(db, "products", productId), {
+            sizeStock
+          });
+        } catch (err) {
+          console.warn("Could not sync updated sizeStock to Firestore doc:", err);
+        }
+      }
     }
   };
 
   const isAdmin = currentUser?.isAdmin || false;
 
   // Combine static initial products with dynamic admin custom creations and filter soft deleted ones
-  const products = [...PRODUCTS, ...customProducts].filter(
-    (product) => !deletedProductIds.includes(product.id)
-  );
+  const products = [...PRODUCTS, ...customProducts]
+    .filter((product) => !deletedProductIds.includes(product.id))
+    .map((product) => {
+      const sizeStock = productStockMap[product.id] || {};
+      const sizeValues = Object.keys(sizeStock).length > 0 ? Object.values(sizeStock) : [];
+      const hasStockConfig = Object.keys(sizeStock).length > 0;
+      const cumulativeStock = sizeValues.reduce((sum, qty) => sum + qty, 0);
+      
+      const isAutoOutOfStock = hasStockConfig && cumulativeStock === 0;
+      const finalOutOfStock = outOfStockProductIds.includes(product.id) || !!product.outOfStock || isAutoOutOfStock;
+      
+      return {
+        ...product,
+        sizeStock,
+        outOfStock: finalOutOfStock
+      };
+    });
 
   return (
     <AppContext.Provider
@@ -457,6 +706,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         cart,
         orders,
         products,
+        notifications,
         login,
         logout,
         signInWithGoogle,
@@ -468,6 +718,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateOrderStatus,
         addNewProduct,
         deleteProduct,
+        subscribeToStockAlert,
+        toggleProductStock,
+        productStockMap,
+        updateProductStock,
         isAdmin,
       }}
     >

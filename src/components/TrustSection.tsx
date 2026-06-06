@@ -1,7 +1,7 @@
 export default function TrustSection() {
   return (
     <section id="philosophy" className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-16 scroll-mt-20">
-      <div className="bg-[#1a1814] text-[#F7F4EE] rounded-sm p-8 sm:p-12 flex flex-col md:flex-row items-center justify-between gap-12 border border-[#C9A84C]/10 shadow-lg">
+      <div className="bg-[#1A1712] text-[#F7F4EE] rounded-sm p-8 sm:p-12 flex flex-col md:flex-row items-center justify-between gap-12 border border-[#C9A84C]/10 shadow-lg">
         
         {/* Left story content column */}
         <div className="space-y-6 max-w-xl">
@@ -24,7 +24,7 @@ export default function TrustSection() {
               const el = document.getElementById("shop");
               if (el) el.scrollIntoView({ behavior: "smooth" });
             }}
-            className="px-6 py-3 bg-[#C9A84C] hover:bg-[#b0913c] text-[#1a1814] font-mono font-bold tracking-widest text-[10px] uppercase rounded-sm transition-all cursor-pointer shadow-sm select-none"
+            className="px-6 py-3 bg-[#C9A84C] hover:bg-[#b0913c] text-[#1A1712] font-mono font-bold tracking-widest text-[10px] uppercase rounded-sm transition-all cursor-pointer shadow-sm select-none"
           >
             Explore drops
           </button>

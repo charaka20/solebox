@@ -57,9 +57,25 @@
         "sizes": { "type": "array" },
         "description": { "type": "string" },
         "image": { "type": "string" },
-        "isCustomImport": { "type": "boolean" }
+        "isCustomImport": { "type": "boolean" },
+        "outOfStock": { "type": "boolean" },
+        "sizeStock": { "type": "object", "description": "Map of size to quantity." }
       },
       "required": ["id", "name", "brand", "price", "sizes", "description", "image"]
+    },
+    "BackInStockNotification": {
+      "title": "Back In Stock Notification Request",
+      "description": "Request to notify user when a product is back in stock.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The request session or generated UUID." },
+        "productId": { "type": "string" },
+        "productName": { "type": "string" },
+        "userEmail": { "type": "string", "format": "email" },
+        "size": { "type": "number" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "productId", "productName", "userEmail", "createdAt"]
     }
   },
   "firestore": {
@@ -78,6 +94,10 @@
     "/products/{productId}": {
       "schema": "Product",
       "description": "Import sneaker products collection."
+    },
+    "/notifications/{notificationId}": {
+      "schema": "BackInStockNotification",
+      "description": "Inbound back-in-stock auto notifications request repository."
     }
   }
 }
